@@ -40,6 +40,8 @@ void MainWindow::OnButtonClicked(){
         tmp_byte_array2 = QCryptographicHash::hash(tmp_byte_arrry, QCryptographicHash::Sha3_256);
     else if(ui->comboBox->currentIndex() == 9)
         tmp_byte_array2 = QCryptographicHash::hash(tmp_byte_arrry, QCryptographicHash::Sha3_384);
+    else if(ui->comboBox->currentIndex() == 10)
+        tmp_byte_array2 = QCryptographicHash::hash(tmp_byte_arrry, QCryptographicHash::Sha3_512);
 
     if(ui->checkBox->isChecked())
         tmp_string = tmp_byte_array2.toBase64();
