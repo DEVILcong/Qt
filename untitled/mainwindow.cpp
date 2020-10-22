@@ -53,7 +53,7 @@ void MainWindow::init_data(void){
     }
 
     QVector<QString> tmp_vector;
-    tmp_vector.push_back("你好老铁\n\n");
+    tmp_vector.push_back("heiheiheiheihei\n\n");
     tmp_vector.push_back("哈哈哈哈哈");
     message_buffer_map["heiheihei6"] = tmp_vector;
 }
