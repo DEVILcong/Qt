@@ -10,11 +10,12 @@ int main(int argc, char *argv[])
 
     QTcpSocket socket;
     volatile char tag = -3;
+    QString client_name;
 
-    //login l(nullptr, &socket, &tag);
-    //l.show();
+    login l(nullptr, &socket, &tag, &client_name);
+    l.show();
 
-    MainWindow w;
+    MainWindow w(nullptr, &socket, &client_name);
     w.show();
     return a.exec();
 }

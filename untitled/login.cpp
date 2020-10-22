@@ -1,7 +1,7 @@
 #include "login.h"
 #include "ui_login.h"
 
-login::login(QWidget *parent, QTcpSocket* tmp_socket, volatile char* tmp_flag) :
+login::login(QWidget *parent, QTcpSocket* tmp_socket, volatile char* tmp_flag, QString* tmp_client_name) :
     QWidget(parent),
     ui(new Ui::login)
 {
@@ -9,6 +9,7 @@ login::login(QWidget *parent, QTcpSocket* tmp_socket, volatile char* tmp_flag) :
 
     this->socket = tmp_socket;
     this->flag = tmp_flag;
+    this->tmp_name = tmp_client_name;
 
     this->process_passwd = new QCryptographicHash(QCryptographicHash::Sha3_256);
     connect(ui->pushButton, SIGNAL(clicked()), this, SLOT(OnButttonClicked()));
@@ -76,6 +77,7 @@ void login::OnButttonClicked(void){
     this->socket->read(&data_received, 1);
     if(data_received == 0){
         *(this->flag) = 1;
+        *(this->tmp_name) = user_name;
         QMessageBox::information(NULL, "恭喜", "连接成功");
     }else if(data_received == -1){
         QMessageBox::critical(NULL, "警告", "用户名不存在");

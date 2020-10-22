@@ -29,7 +29,7 @@ class login : public QWidget
     Q_OBJECT
 
 public:
-    explicit login(QWidget *parent = nullptr, QTcpSocket* tmp_socket = nullptr, volatile char* tmp_flag = nullptr);
+    explicit login(QWidget *parent = nullptr, QTcpSocket* tmp_socket = nullptr, volatile char* tmp_flag = nullptr, QString* tmp_client_name = nullptr);
     ~login();
 
 public slots:
@@ -40,6 +40,7 @@ private:
     Ui::login *ui;
     QTcpSocket* socket;
     volatile char* flag;
+    QString* tmp_name;
     QCryptographicHash *process_passwd;
     login_message_t tmp_login_message;
 };
