@@ -12,8 +12,13 @@
 #include <QFontDatabase>
 #include <QDebug>
 #include <QTcpSocket>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QThread>
 
 #include "item_delegate.h"
+#include "resource.h"
 
 struct message_buffer_t{
     QMutex mtx;
@@ -37,17 +42,31 @@ public slots:
 
 private:
     Ui::MainWindow *ui;
-    QStandardItemModel* m_model;
-    item_delegate* m_delegate;
+    static QStandardItemModel* m_model;
+    static item_delegate* m_delegate;
 
+    static bool if_continue_tag;
+    static QMutex if_continue_mtx;
+
+    static QMutex socket_mtx;
     static QTcpSocket* socket;
     static QString* client_name;
 
     static QString current_client;
+    static double msg_no;
+
     static QMutex message_buffer_map_mtx;
     static QMap<QString, QVector<QString>> message_buffer_map;
     static QVector<QString>* item_message_buffer_ptr;
 
+    static QByteArray byte_array_keep_alive;
+    static QByteArray byte_array_get_user_list;
+
     void init_data(void);
+    static void keep_alive(void);
+    static bool get_user_list(void);
+    static void refresh_user_list(QJsonArray& tmp_array);
+    static void send_msg(QString& msg);
+    static void wait_message_arrival(void);
 };
 #endif // MAINWINDOW_H

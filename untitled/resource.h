@@ -6,6 +6,14 @@
 
 #define SERVER_ADDR "127.0.0.1"
 #define SERVER_PORT 22233
+#define SERVER_NAME "server"
+
+#define KEEP_ALIVE_SEND_INTERVAL_SECONDS 3
+
+#define MSG_TYPE_ERORR "error"
+#define MSG_TYPE_KEEPALIVE "keep"
+#define MSG_TYPE_GET_USER_LIST "get"
+#define MSG_VALUE_FAILED "-1"
 
 class Resource{
 public:
