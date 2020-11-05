@@ -225,6 +225,7 @@ void MainWindow::wait_message_arrival(void){
                     tmp_model_list = m_proxy_model->match(m_proxy_model->index(0, 0), Qt::UserRole, QVariant(tmp_string_sender), 1, Qt::MatchExactly);
                     foreach(tmp_index, tmp_model_list)
                         m_proxy_model->setData(tmp_index, QVariant(1), Qt::UserRole + 1);
+
                 }else if(tmp_string_type == MSG_TYPE_GET_USER_LIST){
                     tmp_json_array = tmp_json_document["content"].toArray();
                     refresh_user_list(tmp_json_array);
