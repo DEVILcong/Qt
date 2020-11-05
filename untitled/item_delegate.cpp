@@ -16,7 +16,7 @@ void item_delegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
         QVariant raw_item = index.data(Qt::UserRole);
         QString name = raw_item.toString();
         raw_item = index.data(Qt::UserRole + 1);
-        bool has_info = raw_item.toBool();
+        int has_info = raw_item.toInt();
 
 
         QRectF rect;
@@ -42,7 +42,7 @@ void item_delegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
             painter->setPen(QColor(Qt::blue));
             painter->setBrush(QColor(229, 241, 255));
             painter->drawPath(path);
-        }else if(has_info == true){
+        }else if(has_info == 1){
             painter->setPen(QColor(Qt::gray));
             painter->setBrush(QColor(255, 99, 71));
             painter->drawPath(path);

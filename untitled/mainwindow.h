@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QStandardItemModel>
 #include <QStandardItem>
+#include <QSortFilterProxyModel>
 #include <QModelIndex>
 #include <QMutex>
 #include <QMutexLocker>
@@ -15,6 +16,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QMessageBox>
 #include <QThread>
 
 #include "item_delegate.h"
@@ -38,11 +40,16 @@ public:
     ~MainWindow();
 
 public slots:
+    void on_connection_lost(void);
     void on_client_clicked(const QModelIndex& index);
+    void on_send_button_clicked(void);
+    void on_filter_button_clicked(void);
+    void on_cancel_button_clicked(void);
 
 private:
     Ui::MainWindow *ui;
     static QStandardItemModel* m_model;
+    static QSortFilterProxyModel* m_proxy_model;
     static item_delegate* m_delegate;
 
     static bool if_continue_tag;
@@ -66,7 +73,7 @@ private:
     static void keep_alive(void);
     static bool get_user_list(void);
     static void refresh_user_list(QJsonArray& tmp_array);
-    static void send_msg(QString& msg);
+    static bool send_msg(QByteArray& msg);
     static void wait_message_arrival(void);
 };
 #endif // MAINWINDOW_H

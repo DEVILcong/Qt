@@ -38,7 +38,7 @@
       <x>10</x>
       <y>10</y>
       <width>191</width>
-      <height>411</height>
+      <height>381</height>
      </rect>
     </property>
    </widget>
@@ -73,6 +73,32 @@
     </property>
     <property name="text">
      <string>发送</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_2">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>390</y>
+      <width>121</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>只显示有消息用户</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_3">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>390</y>
+      <width>41</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>取消</string>
     </property>
    </widget>
   </widget>
