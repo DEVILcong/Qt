@@ -52,6 +52,7 @@ public slots:
 
     void keep_alive(void);
     void on_message_arrival(void);
+    void refresh_msg_area(void);
 
 protected:
     void closeEvent(QCloseEvent* event);
@@ -78,6 +79,7 @@ private:
     QByteArray byte_array_get_user_list;
 
     QTimer* timer;
+    QTimer* refresh_msg_area_timer;
     QTcpSocket* socket;
     QString client_name;
 

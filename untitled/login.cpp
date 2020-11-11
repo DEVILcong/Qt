@@ -72,7 +72,7 @@ void login::OnButttonClicked(void){
     }
 
     socket.read(&data_received, 1);
-    if(data_received == 0 || 1){
+    if(data_received == 0){
         //QMessageBox::information(NULL, "恭喜", "连接成功");
 
         mw->init_data(&socket, user_name);

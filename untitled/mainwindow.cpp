@@ -29,6 +29,7 @@ MainWindow::MainWindow(QWidget *parent)
     if_continue_tag = true;
     msg_no = 0;
     timer = new QTimer(this);
+    refresh_msg_area_timer = new QTimer(this);
 
     socket = nullptr;
     client_name = "";
@@ -42,6 +43,7 @@ MainWindow::~MainWindow()
     delete m_delegate;
 
     delete timer;
+    delete refresh_msg_area_timer;
 }
 
 void MainWindow::init_data(QTcpSocket* tmp_socket, QString& tmp_client_name){
@@ -51,6 +53,7 @@ void MainWindow::init_data(QTcpSocket* tmp_socket, QString& tmp_client_name){
     connect(socket, SIGNAL(disconnected()), this, SLOT(on_connection_lost()));
     connect(socket, SIGNAL(readyRead()), this, SLOT(on_message_arrival()));
     connect(timer, SIGNAL(timeout()), this, SLOT(keep_alive()));
+    connect(refresh_msg_area_timer, SIGNAL(timeout()), this, SLOT(refresh_msg_area()));
     connect(ui->listView, SIGNAL(clicked(const QModelIndex&)), this, SLOT(on_client_clicked(const QModelIndex&)));
     connect(ui->pushButton, SIGNAL(clicked()), this, SLOT(on_send_button_clicked()));
     connect(ui->pushButton_2, SIGNAL(clicked()), this, SLOT(on_filter_button_clicked()));
@@ -89,6 +92,7 @@ void MainWindow::init_data(QTcpSocket* tmp_socket, QString& tmp_client_name){
     ui->listView->setDragEnabled(false);
 
     timer->start(2000);
+    refresh_msg_area_timer->start(1500);
 
     get_user_list();
 
@@ -174,6 +178,18 @@ void MainWindow::closeEvent(QCloseEvent* event){
     event->accept();
 }
 
+void MainWindow::refresh_msg_area(void){
+    QMutexLocker tmp_locker_message_buffer(&message_buffer_map_mtx);
+
+    ui->textBrowser->clear();
+
+    item_message_buffer_ptr = &(message_buffer_map[current_client]);
+
+    for(QVector<QString>::iterator i = item_message_buffer_ptr->begin(); i != item_message_buffer_ptr->end(); ++i){
+        ui->textBrowser->insertHtml(*i);
+    }
+}
+
 void MainWindow::on_message_arrival(void){
     QMutexLocker tmp_locker_socket(&socket_mtx);
     QMutexLocker tmp_locker_message_buffer(&message_buffer_map_mtx);
@@ -221,7 +237,7 @@ void MainWindow::on_message_arrival(void){
                 refresh_user_list(tmp_json_array);
             }else if(tmp_string_type == MSG_TYPE_ERORR){
                 tmp_string_content = tmp_json_document["content"].toString();
-                QMessageBox::critical(NULL, "消息发送失败", tmp_string_content);
+                ui->textBrowser->insertHtml("<sup style=\"color:red\">send failed</sup><br>");
             }
         }
 
@@ -233,8 +249,9 @@ void MainWindow::on_message_arrival(void){
 void MainWindow::on_client_clicked(const QModelIndex& index){
     QMutexLocker tmp_locker(&message_buffer_map_mtx);
     ui->textBrowser->clear();
+    ui->textEdit->clear();
 
-    m_proxy_model->setData(index, false, Qt::UserRole + 1);
+    m_proxy_model->setData(index, QVariant(0), Qt::UserRole + 1);
     current_client = index.data(Qt::UserRole).toString();
     item_message_buffer_ptr = &(message_buffer_map[current_client]);
 
