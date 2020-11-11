@@ -1,15 +1,12 @@
 #include "login.h"
 #include "ui_login.h"
 
-login::login(QWidget *parent, QTcpSocket* tmp_socket, volatile char* tmp_flag, QString* tmp_client_name) :
+login::login(QWidget *parent, MainWindow* tmp_mw) :
     QWidget(parent),
     ui(new Ui::login)
 {
     ui->setupUi(this);
-
-    this->socket = tmp_socket;
-    this->flag = tmp_flag;
-    this->tmp_name = tmp_client_name;
+    this->mw = tmp_mw;
 
     this->process_passwd = new QCryptographicHash(QCryptographicHash::Sha3_256);
     connect(ui->pushButton, SIGNAL(clicked()), this, SLOT(OnButttonClicked()));
@@ -59,26 +56,29 @@ void login::OnButttonClicked(void){
     //qDebug() << tmp_login_message.name << '\n';
     //qDebug() << tmp_login_message.pass << '\n';
 
-    if(this->socket->state() != QAbstractSocket::ConnectedState)
-        this->socket->connectToHost(SERVER_ADDR, SERVER_PORT);
-    if(!this->socket->waitForConnected(3000)){
+    if(socket.state() != QAbstractSocket::ConnectedState)
+        socket.connectToHost(SERVER_ADDR, SERVER_PORT);
+    if(!socket.waitForConnected(3000)){
         QMessageBox::critical(NULL, "错误", "无法连接服务器");
         return;
     }
-    connect(this->socket, SIGNAL(disconnected()), this, SLOT(OnConnectionClosed()));
+    connect(&socket, SIGNAL(disconnected()), this, SLOT(OnConnectionClosed()));
 
 
-    this->socket->write((const char*)&tmp_login_message, sizeof(login_message_t));
-    if(!this->socket->waitForReadyRead(6000)){
+    socket.write((const char*)&tmp_login_message, sizeof(login_message_t));
+    if(!socket.waitForReadyRead(6000)){
          QMessageBox::critical(NULL, "错误", "与服务器通信失败");
          return;
     }
 
-    this->socket->read(&data_received, 1);
-    if(data_received == 0){
-        *(this->flag) = 1;
-        *(this->tmp_name) = user_name;
-        QMessageBox::information(NULL, "恭喜", "连接成功");
+    socket.read(&data_received, 1);
+    if(data_received == 0 || 1){
+        //QMessageBox::information(NULL, "恭喜", "连接成功");
+
+        mw->init_data(&socket, user_name);
+        this->hide();
+        mw->show();
+
     }else if(data_received == -1){
         QMessageBox::critical(NULL, "警告", "用户名不存在");
     }else if(data_received == -2){

@@ -4,18 +4,20 @@
 #include <QApplication>
 #include <QTcpSocket>
 
+//QTcpSocket socket;
+//QString client_name;
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    QTcpSocket socket;
-    volatile char tag = -3;
-    QString client_name;
+    MainWindow w(nullptr);
 
-    login l(nullptr, &socket, &tag, &client_name);
+    login l(nullptr, &w);
     l.show();
 
-    MainWindow w(nullptr, &socket, &client_name);
-    w.show();
+    //w.init_data();
+    //w.show();
+
     return a.exec();
 }

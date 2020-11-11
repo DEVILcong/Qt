@@ -12,6 +12,7 @@
 #include <QDebug>
 
 #include "resource.h"
+#include "mainwindow.h"
 
 struct login_message_t{
      unsigned char type;
@@ -29,7 +30,7 @@ class login : public QWidget
     Q_OBJECT
 
 public:
-    explicit login(QWidget *parent = nullptr, QTcpSocket* tmp_socket = nullptr, volatile char* tmp_flag = nullptr, QString* tmp_client_name = nullptr);
+    explicit login(QWidget *parent = nullptr, MainWindow* tmp_mw = nullptr);
     ~login();
 
 public slots:
@@ -38,9 +39,8 @@ public slots:
 
 private:
     Ui::login *ui;
-    QTcpSocket* socket;
-    volatile char* flag;
-    QString* tmp_name;
+    MainWindow* mw;
+    QTcpSocket socket;
     QCryptographicHash *process_passwd;
     login_message_t tmp_login_message;
 };

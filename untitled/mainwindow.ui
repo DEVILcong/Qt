@@ -65,7 +65,7 @@
     </item>
     <item>
      <widget class="QWidget" name="widget_4" native="true">
-      <layout class="QVBoxLayout" name="verticalLayout_2">
+      <layout class="QVBoxLayout" name="verticalLayout_2" stretch="8,1">
        <item>
         <widget class="QTextBrowser" name="textBrowser"/>
        </item>
@@ -73,7 +73,7 @@
         <widget class="QWidget" name="widget_3" native="true">
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
-           <widget class="QLineEdit" name="lineEdit"/>
+           <widget class="QTextEdit" name="textEdit"/>
           </item>
           <item>
            <widget class="QPushButton" name="pushButton">

@@ -5,6 +5,7 @@
 #include <QModelIndex>
 #include <QStandardItem>
 #include <QPainter>
+#include <QPainterPath>
 
 
 class item_delegate :public QStyledItemDelegate

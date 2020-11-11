@@ -17,6 +17,8 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QMessageBox>
+#include <QCloseEvent>
+#include <QTimer>
 #include <QThread>
 
 #include "item_delegate.h"
@@ -36,8 +38,10 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr, QTcpSocket* tmp_socket = nullptr, QString* tmp_client_name = nullptr);
+    MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+
+    void init_data(QTcpSocket* tmp_socket, QString& tmp_client_name);
 
 public slots:
     void on_connection_lost(void);
@@ -46,34 +50,39 @@ public slots:
     void on_filter_button_clicked(void);
     void on_cancel_button_clicked(void);
 
+    void keep_alive(void);
+    void on_message_arrival(void);
+
+protected:
+    void closeEvent(QCloseEvent* event);
+
 private:
     Ui::MainWindow *ui;
-    static QStandardItemModel* m_model;
-    static QSortFilterProxyModel* m_proxy_model;
-    static item_delegate* m_delegate;
+    QStandardItemModel* m_model;
+    QSortFilterProxyModel* m_proxy_model;
+    item_delegate* m_delegate;
 
-    static bool if_continue_tag;
-    static QMutex if_continue_mtx;
+    bool if_continue_tag;
+    QMutex if_continue_mtx;
 
-    static QMutex socket_mtx;
-    static QTcpSocket* socket;
-    static QString* client_name;
+    QMutex socket_mtx;
 
-    static QString current_client;
-    static double msg_no;
+    QString current_client;
+    double msg_no;
 
-    static QMutex message_buffer_map_mtx;
-    static QMap<QString, QVector<QString>> message_buffer_map;
-    static QVector<QString>* item_message_buffer_ptr;
+    QMutex message_buffer_map_mtx;
+    QMap<QString, QVector<QString>> message_buffer_map;
+    QVector<QString>* item_message_buffer_ptr;
 
-    static QByteArray byte_array_keep_alive;
-    static QByteArray byte_array_get_user_list;
+    QByteArray byte_array_keep_alive;
+    QByteArray byte_array_get_user_list;
 
-    void init_data(void);
-    static void keep_alive(void);
-    static bool get_user_list(void);
-    static void refresh_user_list(QJsonArray& tmp_array);
-    static bool send_msg(QByteArray& msg);
-    static void wait_message_arrival(void);
+    QTimer* timer;
+    QTcpSocket* socket;
+    QString client_name;
+
+    bool get_user_list(void);
+    void refresh_user_list(QJsonArray& tmp_array);
+    bool send_msg(QByteArray& msg);
 };
 #endif // MAINWINDOW_H
