@@ -296,6 +296,7 @@ void MainWindow::on_send_button_clicked(void){
     }
 
     ui->textEdit->clear();
+    ui->textBrowser->moveCursor(QTextCursor::End);
 }
 
 void MainWindow::on_filter_button_clicked(void){
