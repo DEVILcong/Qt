@@ -92,7 +92,7 @@ void MainWindow::init_data(QTcpSocket* tmp_socket, QString& tmp_client_name){
     ui->listView->setDragEnabled(false);
 
     timer->start(2000);
-    refresh_msg_area_timer->start(1500);
+    //refresh_msg_area_timer->start(1500);
 
     get_user_list();
 
@@ -228,9 +228,13 @@ void MainWindow::on_message_arrival(void){
                 message_buffer_map[tmp_string_sender].push_back("<b style=\"color:red\">"+ tmp_string_sender + "</b><br>" + tmp_string_content + "<br>");
                 tmp_locker_message_buffer.unlock();
 
-                tmp_model_list = m_proxy_model->match(m_proxy_model->index(0, 0), Qt::UserRole, QVariant(tmp_string_sender), 1, Qt::MatchExactly);
-                foreach(tmp_index, tmp_model_list)
-                    m_proxy_model->setData(tmp_index, QVariant(1), Qt::UserRole + 1);
+                if(current_client == tmp_string_sender){
+                    ui->textBrowser->insertHtml("<b style=\"color:red\">"+ tmp_string_sender + "</b><br>" + tmp_string_content + "<br>");
+                }else{
+                    tmp_model_list = m_proxy_model->match(m_proxy_model->index(0, 0), Qt::UserRole, QVariant(tmp_string_sender), 1, Qt::MatchExactly);
+                    foreach(tmp_index, tmp_model_list)
+                        m_proxy_model->setData(tmp_index, QVariant(1), Qt::UserRole + 1);
+                }
 
             }else if(tmp_string_type == MSG_TYPE_GET_USER_LIST){
                 tmp_json_array = tmp_json_document["content"].toArray();
