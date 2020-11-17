@@ -1,25 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-//QStandardItemModel* MainWindow::m_model;
-//QSortFilterProxyModel* MainWindow::m_proxy_model;
-//item_delegate* MainWindow::m_delegate;
-
-//bool MainWindow::if_continue_tag;
-//QMutex MainWindow::if_continue_mtx;
-
-//QMutex MainWindow::socket_mtx;
-
-//double MainWindow::msg_no;
-//QString MainWindow::current_client;
-
-//QMutex MainWindow::message_buffer_map_mtx;
-//QMap<QString, QVector<QString>> MainWindow::message_buffer_map;
-//QVector<QString>* MainWindow::item_message_buffer_ptr;
-
-//QByteArray MainWindow::byte_array_keep_alive;
-//QByteArray MainWindow::byte_array_get_user_list;
-
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -50,6 +31,8 @@ void MainWindow::init_data(QTcpSocket* tmp_socket, QString& tmp_client_name){
     socket = tmp_socket;
     client_name = tmp_client_name;
 
+    this->setWindowTitle(client_name);
+
     connect(socket, SIGNAL(disconnected()), this, SLOT(on_connection_lost()));
     connect(socket, SIGNAL(readyRead()), this, SLOT(on_message_arrival()));
     connect(timer, SIGNAL(timeout()), this, SLOT(keep_alive()));
@@ -75,12 +58,10 @@ void MainWindow::init_data(QTcpSocket* tmp_socket, QString& tmp_client_name){
 
     tmp_json_doc.setObject(tmp_json_obj);
     byte_array_keep_alive = tmp_json_doc.toJson(QJsonDocument::Compact);
-    qDebug() << QString(byte_array_keep_alive) << '\n';
 
     tmp_json_obj["type"] = QJsonValue(MSG_TYPE_GET_USER_LIST);
     tmp_json_doc.setObject(tmp_json_obj);
     byte_array_get_user_list = tmp_json_doc.toJson(QJsonDocument::Compact);
-    qDebug() << QString(byte_array_get_user_list) << '\n';
 
     m_model = new QStandardItemModel(this);
     m_proxy_model = new QSortFilterProxyModel(ui->listView);
@@ -91,10 +72,10 @@ void MainWindow::init_data(QTcpSocket* tmp_socket, QString& tmp_client_name){
     ui->listView->setModel(m_proxy_model);
     ui->listView->setDragEnabled(false);
 
-    timer->start(2000);
+    timer->start(KEEP_ALIVE_SEND_INTERVAL_SECONDS * 1000);
     //refresh_msg_area_timer->start(1500);
 
-    get_user_list();
+    //get_user_list();
 
 //    QStandardItem* tmp_item = nullptr;
 
@@ -207,21 +188,26 @@ void MainWindow::on_message_arrival(void){
     static QModelIndexList tmp_model_list;
     static QModelIndex tmp_index;
 
+    static QList<QByteArray> tmp_byte_array_list;
+
     static char data[RECEIVE_BUFFER_SIZE];
     Resource::my_memset(data, RECEIVE_BUFFER_SIZE);
-
-    qDebug() << "msg arrived\n";
 
     //while(tmp_status){
         Resource::my_memset(data, RECEIVE_BUFFER_SIZE);
         tmp_length = socket->read(data, RECEIVE_BUFFER_SIZE);
+        //qDebug() << tmp_length << '\t' << data << '\n';
         tmp_byte_array = QByteArray(data, tmp_length);
-        if(tmp_length > 0){
-            tmp_json_document = QJsonDocument::fromJson(tmp_byte_array);
+        tmp_byte_array_list = tmp_byte_array.split(MESSAGE_SPLIT);
+        //qDebug() << "list size " << tmp_byte_array_list.size() << '\n';
+        for(int i = 0; i < tmp_byte_array_list.size(); ++i){
+            //qDebug() << "process message " << i << '\n';
+            tmp_json_document = QJsonDocument::fromJson(tmp_byte_array_list[i]);
             tmp_string_sender = tmp_json_document["sender"].toString();
             tmp_string_type = tmp_json_document["type"].toString();
 
             if(tmp_string_type == MSG_TYPE_NORMAL){
+                //qDebug() << "message normal\n";
                 tmp_string_content = tmp_json_document["content"].toString();
 
                 tmp_locker_message_buffer.relock();
@@ -229,19 +215,25 @@ void MainWindow::on_message_arrival(void){
                 tmp_locker_message_buffer.unlock();
 
                 if(current_client == tmp_string_sender){
+                    //qDebug() << "insert into textBrowser\n";
                     ui->textBrowser->insertHtml("<b style=\"color:red\">"+ tmp_string_sender + "</b><br>" + tmp_string_content + "<br>");
                 }else{
+                    //qDebug() << "set red ";
                     tmp_model_list = m_proxy_model->match(m_proxy_model->index(0, 0), Qt::UserRole, QVariant(tmp_string_sender), 1, Qt::MatchExactly);
+                    //qDebug() << tmp_model_list.size() << '\n';
                     foreach(tmp_index, tmp_model_list)
                         m_proxy_model->setData(tmp_index, QVariant(1), Qt::UserRole + 1);
                 }
 
             }else if(tmp_string_type == MSG_TYPE_GET_USER_LIST){
+                //qDebug() << "message get\n";
                 tmp_json_array = tmp_json_document["content"].toArray();
                 refresh_user_list(tmp_json_array);
             }else if(tmp_string_type == MSG_TYPE_ERORR){
                 tmp_string_content = tmp_json_document["content"].toString();
                 ui->textBrowser->insertHtml("<sup style=\"color:red\">send failed</sup><br>");
+            }else{
+                //qDebug() << tmp_string_type << '\n';
             }
         }
 

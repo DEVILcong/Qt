@@ -8,7 +8,7 @@
 #define SERVER_PORT 22233
 #define SERVER_NAME "server"
 
-#define KEEP_ALIVE_SEND_INTERVAL_SECONDS 3
+#define KEEP_ALIVE_SEND_INTERVAL_SECONDS 4
 #define MSG_SEND_TRIED_TIME 3
 #define MSG_SEND_TRIED_INTERVAL_MSECONDS 500
 #define RECEIVE_BUFFER_SIZE 1024
@@ -18,6 +18,8 @@
 #define MSG_TYPE_GET_USER_LIST "get"
 #define MSG_TYPE_NORMAL "msg"
 #define MSG_VALUE_FAILED "-1"
+
+#define MESSAGE_SPLIT '\n'
 
 class Resource{
 public:
