@@ -8,7 +8,7 @@
 #include <QMessageBox>
 #include <QCryptographicHash>
 #include <QByteArray>
-#include <QTcpSocket>
+#include <QSslSocket>
 #include <QDebug>
 
 #include "resource.h"
@@ -30,17 +30,18 @@ class login : public QWidget
     Q_OBJECT
 
 public:
-    explicit login(QWidget *parent = nullptr, MainWindow* tmp_mw = nullptr);
+    explicit login(QWidget *parent = nullptr, MainWindow* tmp_mw = nullptr, QSslSocket* tmp_socket_ptr = nullptr);
     ~login();
 
 public slots:
     void OnButttonClicked(void);
     void OnConnectionClosed(void);
+    void OnSslError(const QList<QSslError>& ssl_errors);
 
 private:
     Ui::login *ui;
     MainWindow* mw;
-    QTcpSocket socket;
+    QSslSocket* socket_ptr;
     QCryptographicHash *process_passwd;
     login_message_t tmp_login_message;
 };

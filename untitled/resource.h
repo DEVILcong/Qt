@@ -21,6 +21,9 @@
 
 #define MESSAGE_SPLIT '\n'
 
+#define SERVER_CERT_COMMEN_NAME "DEVILcong2"
+#define SERVER_CERT_EMAIL_ADDR "liangyuecong@sina.com"
+
 class Resource{
 public:
     static QList<QString> forbid_char_in_password;

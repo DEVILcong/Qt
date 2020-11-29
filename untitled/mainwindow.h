@@ -12,7 +12,7 @@
 #include <QMap>
 #include <QFontDatabase>
 #include <QDebug>
-#include <QTcpSocket>
+#include <QSslSocket>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
@@ -41,7 +41,7 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    void init_data(QTcpSocket* tmp_socket, QString& tmp_client_name);
+    void init_data(QSslSocket* tmp_socket, QString& tmp_client_name);
 
 public slots:
     void on_connection_lost(void);
@@ -80,7 +80,7 @@ private:
 
     QTimer* timer;
     QTimer* refresh_msg_area_timer;
-    QTcpSocket* socket;
+    QSslSocket* socket;
     QString client_name;
 
     bool get_user_list(void);

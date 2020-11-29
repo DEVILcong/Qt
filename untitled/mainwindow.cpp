@@ -27,7 +27,7 @@ MainWindow::~MainWindow()
     delete refresh_msg_area_timer;
 }
 
-void MainWindow::init_data(QTcpSocket* tmp_socket, QString& tmp_client_name){
+void MainWindow::init_data(QSslSocket* tmp_socket, QString& tmp_client_name){
     socket = tmp_socket;
     client_name = tmp_client_name;
 

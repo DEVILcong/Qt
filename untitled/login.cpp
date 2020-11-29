@@ -1,15 +1,23 @@
 #include "login.h"
 #include "ui_login.h"
 
-login::login(QWidget *parent, MainWindow* tmp_mw) :
+login::login(QWidget *parent, MainWindow* tmp_mw, QSslSocket* tmp_socket_ptr) :
     QWidget(parent),
     ui(new Ui::login)
 {
     ui->setupUi(this);
     this->mw = tmp_mw;
+    this->socket_ptr = tmp_socket_ptr;
 
     this->process_passwd = new QCryptographicHash(QCryptographicHash::Sha3_256);
     connect(ui->pushButton, SIGNAL(clicked()), this, SLOT(OnButttonClicked()));
+    connect(socket_ptr, SIGNAL(disconnected()), this, SLOT(OnConnectionClosed()));
+
+    connect(socket_ptr, QOverload<const QList<QSslError> &>::of(&QSslSocket::sslErrors), [=](const QList<QSslError> &errors){
+        foreach(QSslError tmp_error, errors){
+            qDebug() << tmp_error.errorString() << '\n';
+        }
+    });
 
     Resource::my_memset(&tmp_login_message, sizeof(login_message_t));
 }
@@ -22,6 +30,10 @@ login::~login()
 
 void login::OnButttonClicked(void){
     QString tmp_string;
+    QStringList cert_commen_name;
+    QStringList cert_email_addr;
+    QSslCertificate peer_cert;
+
     QByteArray tmp_byte_array;
     int tmp_pos = 0;
     char data_received = 0;
@@ -56,36 +68,51 @@ void login::OnButttonClicked(void){
     //qDebug() << tmp_login_message.name << '\n';
     //qDebug() << tmp_login_message.pass << '\n';
 
-    if(socket.state() != QAbstractSocket::ConnectedState)
-        socket.connectToHost(SERVER_ADDR, SERVER_PORT);
-    if(!socket.waitForConnected(3000)){
+    if(socket_ptr->state() != QAbstractSocket::ConnectedState)
+        socket_ptr->connectToHostEncrypted(SERVER_ADDR, SERVER_PORT);
+    if(!socket_ptr->waitForConnected(3000)){
         QMessageBox::critical(NULL, "错误", "无法连接服务器");
         return;
     }
-    connect(&socket, SIGNAL(disconnected()), this, SLOT(OnConnectionClosed()));
+    if(!socket_ptr->waitForEncrypted(3000)){
+        return;
+    }
 
+    peer_cert = socket_ptr->peerCertificate();
+    cert_commen_name = peer_cert.subjectInfo(QSslCertificate::CommonName);
+    cert_email_addr = peer_cert.subjectInfo(QSslCertificate::EmailAddress);
+    if(cert_commen_name.at(0) != QString(SERVER_CERT_COMMEN_NAME) || cert_email_addr.at(0) != QString(SERVER_CERT_EMAIL_ADDR)){
+        QMessageBox::critical(NULL, "错误", "服务器身份错误");
+        socket_ptr->close();
+        return;
+    }
 
-    socket.write((const char*)&tmp_login_message, sizeof(login_message_t));
-    if(!socket.waitForReadyRead(6000)){
+    socket_ptr->write((const char*)&tmp_login_message, sizeof(login_message_t));
+    if(!socket_ptr->waitForReadyRead(6000)){
          QMessageBox::critical(NULL, "错误", "与服务器通信失败");
          return;
     }
 
-    socket.read(&data_received, 1);
+    socket_ptr->read(&data_received, 1);
     if(data_received == 0){
-        //QMessageBox::information(NULL, "恭喜", "连接成功");
-
-        mw->init_data(&socket, user_name);
+        mw->init_data(socket_ptr, user_name);
         this->hide();
         mw->show();
-
     }else if(data_received == -1){
-        QMessageBox::critical(NULL, "警告", "用户名不存在");
-    }else if(data_received == -2){
         QMessageBox::critical(NULL, "警告", "密码错误");
     }
 }
 
 void login::OnConnectionClosed(void){
     QMessageBox::critical(NULL, "错误", "无法连接服务器");
+}
+
+void login::OnSslError(const QList<QSslError>& ssl_errors){
+    QString tmp_string;
+    foreach(QSslError tmp_error, ssl_errors){
+        tmp_string += tmp_error.errorString();
+        tmp_string += "\n";
+    }
+
+    QMessageBox::critical(NULL, "错误", tmp_string);
 }
