@@ -2,35 +2,45 @@
 #include "login.h"
 
 #include <QApplication>
+#include <QMessageBox>
 #include <QSslSocket>
 #include <QSslConfiguration>
 #include <QSslKey>
 #include <QFile>
 #include <QList>
 
-//QTcpSocket socket;
-//QString client_name;
+struct aes_key_item_t server_keys[6];
+struct aes_key_item_t client_keys[30];
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-//    QFile pub_key_file(PUB_KEY_FILE);
-//    QFile pri_key_file(PRI_KEY_FILE);
-//    QFile ca_cert_file(CA_CERT);
-
     QSslSocket ssl_socket;
-//    QList<QSslError> ignore_ssl_errors;
-//    QList<QSslCertificate> ssl_certs;
-
-//    ssl_certs.push_back(QSslCertificate(&pub_key_file));
-//    ssl_certs.push_back(QSslCertificate(&ca_cert_file));
-
-//    ssl_socket.setLocalCertificateChain(ssl_certs);
-//    ssl_socket.setPrivateKey(QSslKey(&pri_key_file));
-//    ssl_socket.setPeerVerifyName(SERVER_HOST_NAME);
-
     ssl_socket.setPeerVerifyMode(QSslSocket::QueryPeer);
+
+    QFile server_key_file(SERVER_KEYS_FILE);
+    QFile client_key_file(CLIENT_KEYS_FILE);
+
+    if(!(server_key_file.open(QIODevice::ReadOnly) && client_key_file.open(QIODevice::ReadOnly))){
+        QMessageBox::critical(NULL, "错误", "无法打开密钥文件");
+        return 0;
+    }
+
+    int length = server_key_file.read((char*)&server_keys, AES_SERVER_KEY_NUM*sizeof(struct aes_key_item_t));
+    if(length < (6 * sizeof(struct aes_key_item_t))){
+        QMessageBox::critical(NULL, "错误", "读取密钥失败");
+        return 0;
+    }
+
+    length = client_key_file.read((char*)&client_keys, AES_CLIENT_KEY_NUM*sizeof(struct aes_key_item_t));
+    if(length < (30 * sizeof(struct aes_key_item_t))){
+        QMessageBox::critical(NULL, "错误", "读取密钥失败");
+        return 0;
+    }
+
+    server_key_file.close();
+    client_key_file.close();
 
     MainWindow w(nullptr);
     login l(nullptr, &w, &ssl_socket);

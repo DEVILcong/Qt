@@ -26,6 +26,7 @@ HEADERS += \
     item_delegate.h \
     login.h \
     mainwindow.h \
+    process_msg.hpp \
     resource.h
 
 FORMS += \
@@ -36,3 +37,15 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+unix:!macx: LIBS += -L$$PWD/./ -lProcessMsg
+
+INCLUDEPATH += $$PWD/.
+DEPENDPATH += $$PWD/.
+
+unix:!macx: LIBS += -lcrypto -lssl
+
+DISTFILES +=
+
+RESOURCES += \
+    keys.qrc

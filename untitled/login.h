@@ -9,10 +9,17 @@
 #include <QCryptographicHash>
 #include <QByteArray>
 #include <QSslSocket>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QTime>
 #include <QDebug>
 
 #include "resource.h"
+#include "process_msg.hpp"
 #include "mainwindow.h"
+
+extern struct aes_key_item_t server_keys[6];
+extern struct aes_key_item_t client_keys[30];
 
 struct login_message_t{
      unsigned char type;
@@ -43,7 +50,12 @@ private:
     MainWindow* mw;
     QSslSocket* socket_ptr;
     QCryptographicHash *process_passwd;
-    login_message_t tmp_login_message;
+
+    QJsonDocument tmp_json_docu;
+    QJsonObject tmp_json_obj;
+    QJsonObject tmp_json_obj_all_message;
+    ProcessMsg* process_msg_ptr;
+    QTime now_time;
 };
 
 #endif // LOGIN_H

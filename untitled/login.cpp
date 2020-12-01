@@ -10,6 +10,9 @@ login::login(QWidget *parent, MainWindow* tmp_mw, QSslSocket* tmp_socket_ptr) :
     this->socket_ptr = tmp_socket_ptr;
 
     this->process_passwd = new QCryptographicHash(QCryptographicHash::Sha3_256);
+    this->process_msg_ptr = new ProcessMsg(server_keys[0].key, server_keys[0].iv);
+    this->now_time = QTime::currentTime();
+
     connect(ui->pushButton, SIGNAL(clicked()), this, SLOT(OnButttonClicked()));
     connect(socket_ptr, SIGNAL(disconnected()), this, SLOT(OnConnectionClosed()));
 
@@ -18,25 +21,26 @@ login::login(QWidget *parent, MainWindow* tmp_mw, QSslSocket* tmp_socket_ptr) :
             qDebug() << tmp_error.errorString() << '\n';
         }
     });
-
-    Resource::my_memset(&tmp_login_message, sizeof(login_message_t));
 }
 
 login::~login()
 {
     delete ui;
     delete process_passwd;
+    delete process_msg_ptr;
 }
 
 void login::OnButttonClicked(void){
-    QString tmp_string;
-    QStringList cert_commen_name;
-    QStringList cert_email_addr;
-    QSslCertificate peer_cert;
+    static QString tmp_string;
+    static QStringList cert_commen_name;
+    static QStringList cert_email_addr;
+    static QSslCertificate peer_cert;
 
     QByteArray tmp_byte_array;
     int tmp_pos = 0;
     char data_received = 0;
+
+    int key_seconds = 0;
 
     QString user_name = ui->lineEdit->text();
     QString password = ui->lineEdit_2->text();
@@ -59,14 +63,27 @@ void login::OnButttonClicked(void){
     tmp_byte_array = this->process_passwd->result();
     tmp_byte_array = tmp_byte_array.toBase64();
 
-    Resource::my_memset(&tmp_login_message, sizeof(login_message_t));
-    tmp_login_message.type = 'L';
-    tmp_login_message.none = 'N';
-    Resource::my_memcpy(user_name.toLocal8Bit().constData(), tmp_login_message.name, user_name.toLocal8Bit().size());
-    Resource::my_memcpy(tmp_byte_array.constData(), tmp_login_message.pass, tmp_byte_array.size());
+    tmp_json_obj.insert("type", QJsonValue(LOGIN_PASSWD_TYPE));
+    tmp_json_obj.insert("username", QJsonValue(user_name));
+    tmp_json_obj.insert("passwd", QJsonValue(QString(tmp_byte_array)));
 
-    //qDebug() << tmp_login_message.name << '\n';
-    //qDebug() << tmp_login_message.pass << '\n';
+    tmp_json_docu.setObject(tmp_json_obj);
+    tmp_byte_array = tmp_json_docu.toJson(QJsonDocument::Compact);
+
+    key_seconds = now_time.second() / (60/AES_SERVER_KEY_NUM);
+    this->process_msg_ptr->AES_256_change_key(server_keys[key_seconds].key, server_keys[key_seconds].iv);
+    this->process_msg_ptr->AES_256_process(tmp_byte_array.data(), tmp_byte_array.length(), 1);
+    if(!this->process_msg_ptr->ifValid()){
+        QMessageBox::critical(NULL, "错误", "加密失败");
+        return;
+    }
+
+    tmp_byte_array = QByteArray(((const char*)this->process_msg_ptr->get_result()), this->process_msg_ptr->get_result_length());
+    tmp_json_obj_all_message.insert("info", QJsonValue(QString(tmp_byte_array)));
+    tmp_json_obj_all_message.insert("value", QJsonValue(key_seconds));
+
+    tmp_json_docu.setObject(tmp_json_obj_all_message);
+    tmp_byte_array = tmp_json_docu.toJson(QJsonDocument::Compact);
 
     if(socket_ptr->state() != QAbstractSocket::ConnectedState)
         socket_ptr->connectToHostEncrypted(SERVER_ADDR, SERVER_PORT);
@@ -87,7 +104,7 @@ void login::OnButttonClicked(void){
         return;
     }
 
-    socket_ptr->write((const char*)&tmp_login_message, sizeof(login_message_t));
+    socket_ptr->write(tmp_byte_array.data(), tmp_byte_array.length());
     if(!socket_ptr->waitForReadyRead(6000)){
          QMessageBox::critical(NULL, "错误", "与服务器通信失败");
          return;

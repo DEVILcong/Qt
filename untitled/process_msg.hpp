@@ -10,7 +10,7 @@
 #include <iostream>
 #include <memory>
 
-#define _OUTPUT_
+//#define _OUTPUT_
 
 #define DIGEST_SIZE 32    //sha3-256
 #define DIGEST_METHOD EVP_sha3_256()
@@ -35,7 +35,7 @@ public:
     ProcessMsg(unsigned char* key, unsigned char* iv);
     ~ProcessMsg();
 
-    void test(void);
+    bool ifValid(void);
     void base64_encode(const char* str, size_t length);
     void base64_decode(const char* str, size_t length);
 

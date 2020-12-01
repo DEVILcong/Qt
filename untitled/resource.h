@@ -8,6 +8,8 @@
 #define SERVER_PORT 22233
 #define SERVER_NAME "server"
 
+#define LOGIN_PASSWD_TYPE "login_passwd"
+
 #define KEEP_ALIVE_SEND_INTERVAL_SECONDS 4
 #define MSG_SEND_TRIED_TIME 3
 #define MSG_SEND_TRIED_INTERVAL_MSECONDS 500
@@ -23,6 +25,16 @@
 
 #define SERVER_CERT_COMMEN_NAME "DEVILcong2"
 #define SERVER_CERT_EMAIL_ADDR "liangyuecong@sina.com"
+
+#define AES_CLIENT_KEY_NUM 30
+#define AES_SERVER_KEY_NUM 6
+#define SERVER_KEYS_FILE ":/sources/server_keys"
+#define CLIENT_KEYS_FILE ":/sources/client_keys"
+
+struct aes_key_item_t{
+    unsigned char key[32];
+    unsigned char iv[16];
+};
 
 class Resource{
 public:
