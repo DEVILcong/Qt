@@ -11,16 +11,15 @@ login::login(QWidget *parent, MainWindow* tmp_mw, QSslSocket* tmp_socket_ptr) :
 
     this->process_passwd = new QCryptographicHash(QCryptographicHash::Sha3_256);
     this->process_msg_ptr = new ProcessMsg(server_keys[0].key, server_keys[0].iv);
-    this->now_time = QTime::currentTime();
 
     connect(ui->pushButton, SIGNAL(clicked()), this, SLOT(OnButttonClicked()));
     connect(socket_ptr, SIGNAL(disconnected()), this, SLOT(OnConnectionClosed()));
 
-    connect(socket_ptr, QOverload<const QList<QSslError> &>::of(&QSslSocket::sslErrors), [=](const QList<QSslError> &errors){
-        foreach(QSslError tmp_error, errors){
-            qDebug() << tmp_error.errorString() << '\n';
-        }
-    });
+//    connect(socket_ptr, QOverload<const QList<QSslError> &>::of(&QSslSocket::sslErrors), [=](const QList<QSslError> &errors){
+//        foreach(QSslError tmp_error, errors){
+//            qDebug() << tmp_error.errorString() << '\n';
+//        }
+//    });
 }
 
 login::~login()
@@ -70,7 +69,7 @@ void login::OnButttonClicked(void){
     tmp_json_docu.setObject(tmp_json_obj);
     tmp_byte_array = tmp_json_docu.toJson(QJsonDocument::Compact);
 
-    key_seconds = now_time.second() / (60/AES_SERVER_KEY_NUM);
+    key_seconds = QTime::currentTime().second() / (60/AES_SERVER_KEY_NUM);
     this->process_msg_ptr->AES_256_change_key(server_keys[key_seconds].key, server_keys[key_seconds].iv);
     this->process_msg_ptr->AES_256_process(tmp_byte_array.data(), tmp_byte_array.length(), 1);
     if(!this->process_msg_ptr->ifValid()){

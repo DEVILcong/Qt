@@ -18,8 +18,7 @@
 #include "process_msg.hpp"
 #include "mainwindow.h"
 
-extern struct aes_key_item_t server_keys[6];
-extern struct aes_key_item_t client_keys[30];
+extern struct aes_key_item_t server_keys[AES_SERVER_KEY_NUM];
 
 struct login_message_t{
      unsigned char type;
@@ -55,7 +54,6 @@ private:
     QJsonObject tmp_json_obj;
     QJsonObject tmp_json_obj_all_message;
     ProcessMsg* process_msg_ptr;
-    QTime now_time;
 };
 
 #endif // LOGIN_H

@@ -19,10 +19,14 @@
 #include <QMessageBox>
 #include <QCloseEvent>
 #include <QTimer>
+#include <QTime>
 #include <QThread>
 
 #include "item_delegate.h"
 #include "resource.h"
+#include "process_msg.hpp"
+
+extern struct aes_key_item_t client_keys[AES_CLIENT_KEY_NUM];
 
 struct message_buffer_t{
     QMutex mtx;
@@ -69,7 +73,9 @@ private:
     QMutex socket_mtx;
 
     QString current_client;
-    double msg_no;
+
+    ProcessMsg* tmp_process_msg;
+    QTime now_time;
 
     QMutex message_buffer_map_mtx;
     QMap<QString, QVector<QString>> message_buffer_map;
@@ -79,7 +85,6 @@ private:
     QByteArray byte_array_get_user_list;
 
     QTimer* timer;
-    QTimer* refresh_msg_area_timer;
     QSslSocket* socket;
     QString client_name;
 

@@ -9,8 +9,8 @@
 #include <QFile>
 #include <QList>
 
-struct aes_key_item_t server_keys[6];
-struct aes_key_item_t client_keys[30];
+struct aes_key_item_t server_keys[AES_SERVER_KEY_NUM];
+struct aes_key_item_t client_keys[AES_CLIENT_KEY_NUM];
 
 int main(int argc, char *argv[])
 {
