@@ -88,6 +88,7 @@ private:
     QSslSocket* socket;
     QString client_name;
 
+    int key_select();
     bool get_user_list(void);
     void refresh_user_list(QJsonArray& tmp_array);
     bool send_msg(QByteArray& msg);

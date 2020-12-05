@@ -39,7 +39,7 @@ void login::OnButttonClicked(void){
     int tmp_pos = 0;
     char data_received = 0;
 
-    int key_seconds = 0;
+    int key_no = 0;
 
     QString user_name = ui->lineEdit->text();
     QString password = ui->lineEdit_2->text();
@@ -69,8 +69,8 @@ void login::OnButttonClicked(void){
     tmp_json_docu.setObject(tmp_json_obj);
     tmp_byte_array = tmp_json_docu.toJson(QJsonDocument::Compact);
 
-    key_seconds = QTime::currentTime().second() / (60/AES_SERVER_KEY_NUM);
-    this->process_msg_ptr->AES_256_change_key(server_keys[key_seconds].key, server_keys[key_seconds].iv);
+    key_no = this->key_select();
+    this->process_msg_ptr->AES_256_change_key(server_keys[key_no].key, server_keys[key_no].iv);
     this->process_msg_ptr->AES_256_process(tmp_byte_array.data(), tmp_byte_array.length(), 1);
     if(!this->process_msg_ptr->ifValid()){
         QMessageBox::critical(NULL, "错误", "加密失败");
@@ -79,7 +79,7 @@ void login::OnButttonClicked(void){
 
     tmp_byte_array = QByteArray(((const char*)this->process_msg_ptr->get_result()), this->process_msg_ptr->get_result_length());
     tmp_json_obj_all_message.insert("info", QJsonValue(QString(tmp_byte_array)));
-    tmp_json_obj_all_message.insert("value", QJsonValue(key_seconds));
+    tmp_json_obj_all_message.insert("value", QJsonValue(key_no));
 
     tmp_json_docu.setObject(tmp_json_obj_all_message);
     tmp_byte_array = tmp_json_docu.toJson(QJsonDocument::Compact);
@@ -131,4 +131,8 @@ void login::OnSslError(const QList<QSslError>& ssl_errors){
     }
 
     QMessageBox::critical(NULL, "错误", tmp_string);
+}
+
+int login::key_select(void){
+    return QTime::currentTime().second() / (60/AES_SERVER_KEY_NUM);
 }

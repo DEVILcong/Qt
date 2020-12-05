@@ -54,6 +54,8 @@ private:
     QJsonObject tmp_json_obj;
     QJsonObject tmp_json_obj_all_message;
     ProcessMsg* process_msg_ptr;
+
+    int key_select(void);
 };
 
 #endif // LOGIN_H

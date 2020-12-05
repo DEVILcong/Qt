@@ -188,8 +188,17 @@ void MainWindow::on_message_arrival(void){
             this->tmp_process_msg->AES_256_change_key(client_keys[key_selector].key, client_keys[key_selector].iv);
             this->tmp_process_msg->AES_256_process(tmp_byte_array.data(), tmp_byte_array.length(), 0);
             if(!this->tmp_process_msg->ifValid()){
-                tmp_string_content = QString("--------解密失败-----------");
-                continue;
+                for(int i = 0; i < AES_PROCESS_TRY_TIME; ++i){
+                    this->tmp_process_msg->AES_256_process(tmp_byte_array.data(), tmp_byte_array.length()-1, 0);
+                    if(this->tmp_process_msg->ifValid())
+                        break;
+                }
+                if(!this->tmp_process_msg->ifValid())
+                    tmp_string_content = QString("--------解密失败-----------");
+                else{
+                    tmp_byte_array = QByteArray((const char*)this->tmp_process_msg->get_result(), this->tmp_process_msg->get_result_length());
+                    tmp_string_content = QString(tmp_byte_array);
+                }
             }else{
                 tmp_byte_array = QByteArray((const char*)this->tmp_process_msg->get_result(), this->tmp_process_msg->get_result_length());
                 tmp_string_content = QString(tmp_byte_array);
@@ -201,6 +210,7 @@ void MainWindow::on_message_arrival(void){
 
             if(current_client == tmp_string_sender){
                 ui->textBrowser->insertHtml("<b style=\"color:red\">"+ tmp_string_sender + "</b><br>" + tmp_string_content + "<br>");
+                ui->textBrowser->moveCursor(QTextCursor::End);
             }else{
                 tmp_model_list = m_proxy_model->match(m_proxy_model->index(0, 0), Qt::UserRole, QVariant(tmp_string_sender), 1, Qt::MatchExactly);
                 foreach(tmp_index, tmp_model_list)
@@ -241,13 +251,12 @@ void MainWindow::on_send_button_clicked(void){
     QJsonObject tmp_json_object;
     QJsonDocument tmp_json_document;
 
-    int key_selector = QTime::currentTime().second();
-    this->tmp_process_msg->AES_256_change_key(client_keys[key_selector].key, client_keys[key_selector].iv);
+    int key_no = this->key_select();
+    this->tmp_process_msg->AES_256_change_key(client_keys[key_no].key, client_keys[key_no].iv);
 
     QString tmp_string = ui->textEdit->toPlainText();
     tmp_string.replace("\n", "<br/>");
     QByteArray tmp_byteArray = tmp_string.toUtf8();
-    qDebug() << tmp_byteArray << '\n';
     this->tmp_process_msg->AES_256_process(tmp_byteArray.data(), tmp_byteArray.length(), 1);
 
     if(!this->tmp_process_msg->ifValid()){
@@ -259,14 +268,12 @@ void MainWindow::on_send_button_clicked(void){
     }
 
     tmp_byteArray = QByteArray((const char*)this->tmp_process_msg->get_result(), this->tmp_process_msg->get_result_length());
-    qDebug() << tmp_byteArray << '\n';
-    qDebug() << '\n';
 
     tmp_json_object.insert("receiver", current_client);
     tmp_json_object.insert("sender", client_name);
     tmp_json_object.insert("type", MSG_TYPE_NORMAL);
     tmp_json_object.insert("content", QString(tmp_byteArray));
-    tmp_json_object.insert("no", key_selector);
+    tmp_json_object.insert("no", key_no);
 
     tmp_json_document.setObject(tmp_json_object);
     QByteArray tmp_byte_array = tmp_json_document.toJson(QJsonDocument::Compact);
@@ -292,4 +299,8 @@ void MainWindow::on_filter_button_clicked(void){
 
 void MainWindow::on_cancel_button_clicked(void){
     m_proxy_model->setFilterFixedString(QString());
+}
+
+int MainWindow::key_select(void){
+    return QTime::currentTime().second() / (60 / AES_CLIENT_KEY_NUM);
 }

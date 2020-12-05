@@ -28,6 +28,7 @@
 
 #define AES_CLIENT_KEY_NUM 30
 #define AES_SERVER_KEY_NUM 6
+#define AES_PROCESS_TRY_TIME 3
 #define SERVER_KEYS_FILE ":/sources/server_keys"
 #define CLIENT_KEYS_FILE ":/sources/client_keys"
 
