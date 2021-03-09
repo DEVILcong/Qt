@@ -85,7 +85,7 @@ void login::OnButttonClicked(void){
     tmp_byte_array = tmp_json_docu.toJson(QJsonDocument::Compact);
 
     if(socket_ptr->state() != QAbstractSocket::ConnectedState)
-        socket_ptr->connectToHostEncrypted(SERVER_ADDR, SERVER_PORT);
+        socket_ptr->connectToHostEncrypted(config_json["server_addr"].toString(), config_json["server_port"].toInt());
     if(!socket_ptr->waitForConnected(3000)){
         QMessageBox::critical(NULL, "错误", "无法连接服务器");
         return;
@@ -97,7 +97,7 @@ void login::OnButttonClicked(void){
     peer_cert = socket_ptr->peerCertificate();
     cert_commen_name = peer_cert.subjectInfo(QSslCertificate::CommonName);
     cert_email_addr = peer_cert.subjectInfo(QSslCertificate::EmailAddress);
-    if(cert_commen_name.at(0) != QString(SERVER_CERT_COMMEN_NAME) || cert_email_addr.at(0) != QString(SERVER_CERT_EMAIL_ADDR)){
+    if(cert_commen_name.at(0) != config_json["server_cert_common_name"].toString() || cert_email_addr.at(0) != config_json["server_cert_email_addr"].toString()){
         QMessageBox::critical(NULL, "错误", "服务器身份错误");
         socket_ptr->close();
         return;

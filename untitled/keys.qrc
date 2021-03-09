@@ -2,5 +2,6 @@
     <qresource prefix="/">
         <file>sources/client_keys</file>
         <file>sources/server_keys</file>
+        <file>sources/config.json</file>
     </qresource>
 </RCC>

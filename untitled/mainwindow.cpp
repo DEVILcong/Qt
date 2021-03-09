@@ -50,7 +50,7 @@ void MainWindow::init_data(QSslSocket* tmp_socket, QString& tmp_client_name){
     QJsonDocument tmp_json_doc;
     QJsonObject tmp_json_obj;
 
-    tmp_json_obj.insert("receiver", QJsonValue(SERVER_NAME));
+    tmp_json_obj.insert("receiver", QJsonValue(config_json["server_name"].toString()));
     tmp_json_obj.insert("sender", QJsonValue(client_name));
     tmp_json_obj.insert("type", QJsonValue(MSG_TYPE_KEEPALIVE));
 
@@ -174,7 +174,7 @@ void MainWindow::on_message_arrival(void){
     tmp_byte_array_list = tmp_byte_array.split(MESSAGE_SPLIT);
 
     for(int i = 0; i < tmp_byte_array_list.size(); ++i){
-
+        //qDebug() << tmp_byte_array_list[i] << '\n';
         tmp_json_document = QJsonDocument::fromJson(tmp_byte_array_list[i]);
         tmp_string_sender = tmp_json_document["sender"].toString();
         tmp_string_type = tmp_json_document["type"].toString();
@@ -248,29 +248,46 @@ void MainWindow::on_connection_lost(void){
 }
 
 void MainWindow::on_send_button_clicked(void){
-    QJsonObject tmp_json_object;
-    QJsonDocument tmp_json_document;
+    static QJsonObject tmp_json_object;
+    static QJsonDocument tmp_json_document;
+
+    tmp_json_object.insert("receiver", current_client);
+    tmp_json_object.insert("sender", client_name);
+
+    static QString tmp_string_all;
+    static QString tmp_string;
+
+    tmp_string_all = ui->textEdit->toPlainText();
+    tmp_string.clear();
+    QString::iterator tmp_string_iterator = tmp_string_all.begin();
+
+    int i = tmp_string_all.size();
+    int k = 0;
+
+    k = i > STRING_SPLIT_NUM_LIMIT ? STRING_SPLIT_NUM_LIMIT : i;
+    tmp_string.clear();
+    for(int j = 0; j < k; ++j){
+        tmp_string.append((*tmp_string_iterator));
+        tmp_string_iterator += 1;
+    }
+    i-=k;
+
+    tmp_string.replace("\n", "<br/>");
 
     int key_no = this->key_select();
     this->tmp_process_msg->AES_256_change_key(client_keys[key_no].key, client_keys[key_no].iv);
 
-    QString tmp_string = ui->textEdit->toPlainText();
-    tmp_string.replace("\n", "<br/>");
     QByteArray tmp_byteArray = tmp_string.toUtf8();
     this->tmp_process_msg->AES_256_process(tmp_byteArray.data(), tmp_byteArray.length(), 1);
 
     if(!this->tmp_process_msg->ifValid()){
         ui->textBrowser->insertHtml("<b style=\"color:red\">信息加密失败</b><br>");
-
         ui->textBrowser->moveCursor(QTextCursor::End);
-
         return;
     }
 
     tmp_byteArray = QByteArray((const char*)this->tmp_process_msg->get_result(), this->tmp_process_msg->get_result_length());
 
-    tmp_json_object.insert("receiver", current_client);
-    tmp_json_object.insert("sender", client_name);
     tmp_json_object.insert("type", MSG_TYPE_NORMAL);
     tmp_json_object.insert("content", QString(tmp_byteArray));
     tmp_json_object.insert("no", key_no);
@@ -290,6 +307,15 @@ void MainWindow::on_send_button_clicked(void){
     }
 
     ui->textEdit->clear();
+    if(i > 0){
+        tmp_string.clear();
+        for(int j = 0; j < i; ++j){
+            tmp_string.append((*tmp_string_iterator));
+            tmp_string_iterator += 1;
+        }
+        ui->textEdit->insertPlainText(tmp_string);
+    }
+
     ui->textBrowser->moveCursor(QTextCursor::End);
 }
 

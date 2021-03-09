@@ -27,6 +27,7 @@
 #include "process_msg.hpp"
 
 extern struct aes_key_item_t client_keys[AES_CLIENT_KEY_NUM];
+extern QJsonObject config_json;
 
 struct message_buffer_t{
     QMutex mtx;

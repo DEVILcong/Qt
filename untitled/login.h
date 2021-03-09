@@ -19,6 +19,7 @@
 #include "mainwindow.h"
 
 extern struct aes_key_item_t server_keys[AES_SERVER_KEY_NUM];
+extern QJsonObject config_json;
 
 struct login_message_t{
      unsigned char type;

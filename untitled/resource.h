@@ -4,9 +4,9 @@
 #include <QString>
 #include <QList>
 
-#define SERVER_ADDR "127.0.0.1"
-#define SERVER_PORT 22233
-#define SERVER_NAME "server"
+//#define SERVER_ADDR "127.0.0.1"
+//#define SERVER_PORT 22233
+//#define SERVER_NAME "server"
 
 #define LOGIN_PASSWD_TYPE "login_passwd"
 
@@ -21,10 +21,13 @@
 #define MSG_TYPE_NORMAL "msg"
 #define MSG_VALUE_FAILED "-1"
 
-#define MESSAGE_SPLIT '\n'
+#define MESSAGE_SPLIT '#'
+#define STRING_SPLIT_NUM_LIMIT 210
 
-#define SERVER_CERT_COMMEN_NAME "DEVILcong2"
-#define SERVER_CERT_EMAIL_ADDR "liangyuecong@sina.com"
+//#define SERVER_CERT_COMMEN_NAME "DEVILcong2"
+//#define SERVER_CERT_EMAIL_ADDR "liangyuecong@sina.com"
+
+#define CONFIG_FILE_PATH ":/sources/config.json"
 
 #define AES_CLIENT_KEY_NUM 30
 #define AES_SERVER_KEY_NUM 6
