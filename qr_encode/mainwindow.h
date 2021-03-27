@@ -24,6 +24,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
+    int input_max_length = 500;  //最大输入长度
     QPixmap *pixmap;
     int image_area_width;
     int image_area_height; //qt图片显示区域长宽，此处为一个QLabel

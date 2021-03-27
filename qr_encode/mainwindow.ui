@@ -27,7 +27,7 @@
        <item>
         <widget class="QLabel" name="label">
          <property name="text">
-          <string>二维码显示区域，输入字符串长度不要超过100</string>
+          <string>二维码显示区域，注意底部输入长度</string>
          </property>
         </widget>
        </item>

@@ -27,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent)
 void MainWindow::onTextEditInput(void){
     int length = ui->textEdit->toPlainText().size();
 
-    statusBar()->showMessage(QString("length: ") + QString::number(length) + QString("/100"));
+    statusBar()->showMessage(QString("length: ") + QString::number(length) + QString("/") + QString::number(this->input_max_length));
 }
 
 void MainWindow::onClearButtonClicked(void){
@@ -39,8 +39,8 @@ void MainWindow::onAckButtonClicked(void){
     this->image_area_height = ui->label->height();
     float x = 0, y = 0;
     QString content = ui->textEdit->toPlainText();
-    if(content.size() > 100){
-        QMessageBox::warning(this, "warning", "Input content length > 100, Abort");
+    if(content.size() > this->input_max_length){
+        QMessageBox::warning(this, "warning", "输入数据太长了");
         return;
     }
 
