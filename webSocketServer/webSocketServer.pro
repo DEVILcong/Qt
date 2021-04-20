@@ -1,6 +1,6 @@
 QT       += core gui
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets websockets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets websockets network
 
 CONFIG += c++11
 
@@ -10,15 +10,24 @@ CONFIG += c++11
 
 SOURCES += \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    qrcode_win.cpp
 
 HEADERS += \
-    mainwindow.h
+    mainwindow.h \
+    qrcode_win.h \
+    qrencode.h
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    qrcode_win.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+unix:!macx: LIBS += -L$$PWD/./ -lqrencode
+
+INCLUDEPATH += $$PWD/.
+DEPENDPATH += $$PWD/.

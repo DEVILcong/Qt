@@ -4,6 +4,10 @@
 #include <QMainWindow>
 #include <QWebSocketServer>
 #include <QWebSocket>
+#include <QPixmap>
+#include "qrcode_win.h"
+
+#define MSG_TYPE_HEADER "msg_type"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -19,18 +23,23 @@ public:
 
 public slots:
     void onWebSocketConnectionComing(void);
-    void onWebSocket1MsgComing(const QString& message);
-    void onWebSocket2MsgComing(const QString& message);
-    void onWebSocket1Disconnected(void);
-    void onWebSocket2Disconnected(void);
+    void onWebSocketTmpMsgComing(const QString& message);
+    void onWebSocketPCMsgComing(const QString& message);
+    void onWebSocketPhoneMsgComing(const QString& message);
+    void onWebSocketPCDisconnected(void);
+    void onWebSocketPhoneDisconnected(void);
 
-    void clearButtonClicked(void);
+    void onClearButtonClicked(void);
+    void onQRCodeButtonClicked(void);
 
 private:
     int listenPort;
+    int clientId;
 
+    QPixmap *pixmap;
+    QRCode_win *tmp_qrcode_win;
     QWebSocketServer* webSocketServer;
-    QWebSocket *webSocket1, *webSocket2;
+    QWebSocket *webSocket_pc, *webSocket_phone, *tmp_websocket;
     Ui::MainWindow *ui;
 };
 #endif // MAINWINDOW_H

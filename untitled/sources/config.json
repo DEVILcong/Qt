@@ -1,0 +1,8 @@
+{
+    "server_addr": "127.0.0.1",
+    "server_port": 22233,
+    "server_name": "server",
+
+    "server_cert_common_name": "DEVILcong2",
+    "server_cert_email_addr": "liangyuecong@sina.com"
+}
