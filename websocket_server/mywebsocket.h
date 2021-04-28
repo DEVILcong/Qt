@@ -4,9 +4,10 @@
 #include <QtWebSockets/QWebSocketServer>
 #include <QtWebSockets/QWebSocket>
 #include <QMap>
+#include <QMutex>
 #include <QTimer>
 
-#define CONFIG_FILE_PATH "/config/config.json"
+#define CONFIG_FILE_PATH ":/config/config.json"
 #define WEBSOCKET_CLIENT_TYPE_PC 1
 #define WEBSOCKET_CLIENT_TYPE_PHONE 2
 #define TMP_WEBSOCKET_MAX_NUM 10
@@ -41,15 +42,16 @@ struct tmp_websocket_item{
 
 class MyWebsocket : QObject
 {
+    Q_OBJECT
 public:
     MyWebsocket();
     ~MyWebsocket();
     qint8 get_success_tag();
 
-private slots:
+public slots:
     void onListenSocketNewConnection(void);
     void onTimerCleanTmpWebSockets(void);
-    void onWebSocketMsgArrived(QString &message);
+    void onWebSocketMsgArrived(const QString &message);
     void onWebSocketDisconnect();
 
 private:
@@ -61,8 +63,12 @@ private:
     qint32 port;
     QTimer* tmp_qtimer;
 
+    QMutex to_clean_websockets_mtx;
+    QList<QWebSocket*> to_clean_websockets;
+
     QWebSocketServer* websocket_server;
     QMap<double, struct websocket_pair*> websocket_map;
+    QMap<QWebSocket*, double> reverse_websocket_map;
     QMap<QWebSocket*, struct tmp_websocket_item*> tmp_websocket_map;
 };
 
